@@ -1,0 +1,16 @@
+Checks: 'readability-*,bugprone-*,clang-analyzer-*,performance-*'
+CheckOptions:
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.AllowedShortNames
+    value: 'i;j;k;t;x;y;z;w;h;m;q;r;pi;g;p;dx;dy;dt;di;dj;dh;dw;dp;dk'
+WarningsAsErrors: 'modernize-use-nullptr'
+HeaderFilterRegex: '.*'
+FormatStyle: file
+CheckOptions:
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+  - key:             readability-function-size.LineThreshold
+    value:           '100'
+  - key:             readability-function-cognitive-complexity.Threshold
+    value:           '20'
