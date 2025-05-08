@@ -1,6 +1,7 @@
 #include "bk_tree.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -11,6 +12,7 @@ namespace BK {
 void Tree::insert(std::shared_ptr<Word> word) {
     if (root.get() == nullptr) {
         root = std::make_unique<Node>(word);
+        stable = false;
         return;
     }
     Node *node = root.get();
@@ -20,6 +22,7 @@ void Tree::insert(std::shared_ptr<Word> word) {
         Node *child = node->get_child(distance);
         if (child == nullptr) {
             node->set_child(distance, word);
+            stable = false;
             return;
         }
         node = child;
@@ -34,6 +37,26 @@ std::vector<std::shared_ptr<Word>> Tree::search(const std::string &query, int ma
     }
     search_core(root.get(), query, max_distance, results, max_searches);
     return results;
+}
+
+void Tree::set_stable(bool stable) {
+    this->stable = stable;
+}
+
+size_t Tree::get_memory_usage() {
+    if (stable == false || memory_usage == 0) {
+        memory_usage = calculate_memory_usage(root.get());
+        stable = true;
+    }
+    return memory_usage;
+}
+
+int Tree::get_height() {
+    if (stable == false || height == 0) {
+        height = calculate_height(root.get());
+        stable = true;
+    }
+    return height;
 }
 
 void Tree::search_core(const Node *node, const std::string &query, int max_distance,
@@ -86,6 +109,27 @@ int Tree::calculate_distance(const std::string &s1, const std::string &s2) const
     }
     // The result is in prev[n] after the final swap
     return prev[sz2];
+}
+
+size_t Tree::calculate_memory_usage(const Node *node) const {
+    if (node == nullptr) return 0;
+
+    size_t size = sizeof(Node);
+
+    for (const auto &[_, child] : node->get_children()) {
+        size += calculate_memory_usage(child.get());
+    }
+    return size;
+}
+
+int Tree::calculate_height(const Node *node) const {
+    if (node == nullptr) return 0;
+
+    int max_depth = 0;
+    for (const auto &[_, child] : node->get_children()) {
+        max_depth = std::max(max_depth, calculate_height(child.get()));
+    }
+    return 1 + max_depth;
 }
 
 };  // namespace BK
