@@ -2,7 +2,6 @@
 
 #include <cctype>
 #include <fstream>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -14,6 +13,7 @@
 Dictionary::Dictionary() {
     trie = std::make_unique<Trie::Tree>();
     bktree = std::make_unique<BK::Tree>();
+    config = std::make_unique<Config>();
 }
 
 Dictionary::Dictionary(const std::string &filepath) : Dictionary() {
@@ -61,23 +61,31 @@ std::vector<std::shared_ptr<Word>> Dictionary::search(const std::string &query) 
     switch (mode) {
         case Mode::Search: {
             std::shared_ptr<Word> word = trie->search(query);
-            if (word == nullptr) return bktree->search(query, 2);
+            if (word == nullptr) {
+                return bktree->search(query, config->max_distance, config->max_suggestions);
+            }
             return {word};
         }
         case Mode::Suggest: {
             std::string prefix = query;
             prefix.pop_back();
-            return trie->suggest(prefix);
+            return trie->suggest(prefix, config->max_suggestions);
         }
         case Mode::Match:
-            return trie->match(query);
+            return trie->match(query, config->max_matches);
         case Mode::None:
-            log(Status::Warning, "Invalid query");
+            log(Status::Warning, "invalid query");
             return {};
         default:
-            log(Status::Critical, "Unexpected fallback");
+            log(Status::Critical, "unexpected fallback");
             return {};
     }
+}
+
+void Dictionary::set_config(const Config &cfg) {
+    config->max_distance = cfg.max_distance;
+    config->max_suggestions = cfg.max_suggestions;
+    config->max_matches = cfg.max_matches;
 }
 
 Mode Dictionary::recognize(const std::string &query) const {
