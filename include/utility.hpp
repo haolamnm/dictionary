@@ -14,8 +14,11 @@
 // String manipulation
 std::string lower(const std::string &str);
 
+// Log message with status
 enum class Status { Debug, Info, Success, Warning, Error, Critical };
-
 void log(Status status, const std::string &msg);
+
+// Safely get integer input
+bool get_int(int &input, const std::string &prompt, int min_value = 0, int max_value = 100);
 
 #endif
