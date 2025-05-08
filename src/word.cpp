@@ -81,11 +81,11 @@ void print(std::shared_ptr<Word> word) {
     std::string text = word->get_text();
     std::string definition = word->get_definition();
     std::string pos = parse_pos(word->get_pos());
-    std::cout << text << " (" << pos << ")" << ": " << definition << ".\n";
+    std::cout << "\t" << text << " (" << pos << ")" << ": " << definition << ".\n";
 }
 
 void print(std::vector<std::shared_ptr<Word>> words) {
-    std::string message = std::format("Found {} result(s)", words.size());
+    std::string message = std::format("found {} result(s)", words.size());
     log(Status::Info, message);
 
     for (std::shared_ptr<Word> word : words) {
