@@ -10,6 +10,9 @@ namespace Trie {
 
 Tree::Tree() {
     root = std::make_unique<Node>();
+    memory_usage = 0;
+    stable = true;
+    height = 0;
 }
 
 void Tree::insert(std::shared_ptr<Word> word) {
@@ -19,6 +22,7 @@ void Tree::insert(std::shared_ptr<Word> word) {
         node = child;
     }
     node->set_word(word);
+    stable = false;
 }
 
 std::shared_ptr<Word> Tree::search(const std::string &word) const {
@@ -52,6 +56,26 @@ std::vector<std::shared_ptr<Word>> Tree::match(const std::string &pattern, int m
     Node *node = root.get();
     match_core(node, 0, "", pattern, matches, max_matches);
     return matches;
+}
+
+void Tree::set_stable(bool stable) {
+    this->stable = stable;
+}
+
+size_t Tree::get_memory_usage() {
+    if (stable == false || memory_usage == 0) {
+        memory_usage = calculate_memory_usage(root.get());
+        stable = true;
+    }
+    return memory_usage;
+}
+
+int Tree::get_height() {
+    if (stable == false || height == 0) {
+        height = calculate_height(root.get());
+        stable = true;
+    }
+    return height;
 }
 
 void Tree::suggest_core(const Node *node, std::string prefix,
@@ -126,6 +150,27 @@ void Tree::match_core(const Node *node, size_t pattern_index, const std::string 
                        max_matches);
         }
     }
+}
+
+size_t Tree::calculate_memory_usage(const Node *node) const {
+    if (node == nullptr) return 0;
+
+    size_t size = sizeof(Node);
+
+    for (const auto &[_, child] : node->get_children()) {
+        size += calculate_memory_usage(child.get());
+    }
+    return size;
+}
+
+int Tree::calculate_height(const Node *node) const {
+    if (node == nullptr) return 0;
+
+    int max_depth = 0;
+    for (const auto &[_, child] : node->get_children()) {
+        max_depth = std::max(max_depth, calculate_height(child.get()));
+    }
+    return 1 + max_depth;
 }
 
 };  // namespace Trie
