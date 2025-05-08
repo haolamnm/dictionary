@@ -26,23 +26,25 @@ void Tree::insert(std::shared_ptr<Word> word) {
     }
 }
 
-std::vector<std::shared_ptr<Word>> Tree::search(const std::string &query, int max_distance) const {
-    if (root.get() == nullptr) {
-        return {};
-    }
+std::vector<std::shared_ptr<Word>> Tree::search(const std::string &query, int max_distance,
+                                                int max_searches) const {
     std::vector<std::shared_ptr<Word>> results;
-    if (root != nullptr) {
-        search_core(root.get(), query, max_distance, results);
+    if (root.get() == nullptr) {
+        return results;
     }
+    search_core(root.get(), query, max_distance, results, max_searches);
     return results;
 }
 
 void Tree::search_core(const Node *node, const std::string &query, int max_distance,
-                       std::vector<std::shared_ptr<Word>> &results) const {
+                       std::vector<std::shared_ptr<Word>> &results, int max_searches) const {
+    if (node == nullptr || results.size() >= max_searches) return;
+
     int distance = calculate_distance(query, node->get_word()->get_text());
 
     if (distance <= max_distance) {
         results.push_back(node->get_word());
+        if (results.size() >= max_searches) return;
     }
 
     const auto &children = node->get_children();
@@ -50,7 +52,8 @@ void Tree::search_core(const Node *node, const std::string &query, int max_dista
         auto it = children.find(d);
         if (it != children.end()) {
             Node *child = it->second.get();
-            search_core(child, query, max_distance, results);
+            search_core(child, query, max_distance, results, max_searches);
+            if (results.size() >= max_searches) return;
         }
     }
 }
