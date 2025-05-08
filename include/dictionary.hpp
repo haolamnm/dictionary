@@ -28,6 +28,11 @@ class Dictionary {
     std::unique_ptr<Trie::Tree> trie;
     std::unique_ptr<BK::Tree> bktree;
     std::unique_ptr<Config> config;
+    size_t memory_usage = 0;
+    bool stable = true;
+    int word_count = 0;
+    int trie_height = 0;
+    int bktree_height = 0;
 
    public:
     Dictionary();
@@ -39,7 +44,14 @@ class Dictionary {
 
     std::vector<std::shared_ptr<Word>> search(const std::string &query) const;
 
+    void set_stable(bool stable);
     void set_config(const Config &cfg);
+
+    int get_stable() const;
+    int get_word_count() const;
+    size_t get_memory_usage();
+    int get_trie_height();
+    int get_bktree_height();
 
    private:
     Mode recognize(const std::string &query) const;

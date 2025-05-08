@@ -14,6 +14,7 @@ Dictionary::Dictionary() {
     trie = std::make_unique<Trie::Tree>();
     bktree = std::make_unique<BK::Tree>();
     config = std::make_unique<Config>();
+    word_count = 0;
 }
 
 Dictionary::Dictionary(const std::string &filepath) : Dictionary() {
@@ -50,7 +51,17 @@ bool Dictionary::load(const std::string &filepath) {
 
         std::shared_ptr<Word> word = std::make_shared<Word>(text, definition, pos);
         insert(word);
+        word_count += 1;
     }
+    // Set as stable after load a file
+    trie->set_stable(true);
+    bktree->set_stable(true);
+
+    // Load member parameters
+    memory_usage = trie->get_memory_usage() + bktree->get_memory_usage();
+    trie_height = trie->get_height();
+    bktree_height = bktree->get_height();
+
     fin.close();
     return true;
 }
@@ -82,10 +93,46 @@ std::vector<std::shared_ptr<Word>> Dictionary::search(const std::string &query) 
     }
 }
 
+void Dictionary::set_stable(bool stable) {
+    this->stable = stable;
+}
+
 void Dictionary::set_config(const Config &cfg) {
     config->max_distance = cfg.max_distance;
     config->max_suggestions = cfg.max_suggestions;
     config->max_matches = cfg.max_matches;
+}
+
+int Dictionary::get_stable() const {
+    return stable;
+}
+
+int Dictionary::get_word_count() const {
+    return word_count;
+}
+
+size_t Dictionary::get_memory_usage() {
+    if (stable == false || memory_usage == 0) {
+        memory_usage = trie->get_memory_usage() + bktree->get_memory_usage();
+        stable = true;
+    }
+    return memory_usage;
+}
+
+int Dictionary::get_trie_height() {
+    if (stable == false || trie_height == 0) {
+        trie_height = trie->get_height();
+        stable = true;
+    }
+    return trie_height;
+}
+
+int Dictionary::get_bktree_height() {
+    if (stable == false || bktree_height == 0) {
+        bktree_height = bktree->get_height();
+        stable = true;
+    }
+    return bktree_height;
 }
 
 Mode Dictionary::recognize(const std::string &query) const {
