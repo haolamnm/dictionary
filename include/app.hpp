@@ -29,7 +29,6 @@ class App {
     void show_stats() const;
     void clear() const;
     void config();
-    ;
 };
 
 #endif

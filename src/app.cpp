@@ -1,6 +1,7 @@
 #include "app.hpp"
 
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -98,7 +99,14 @@ void App::show_docs() const {
     std::cout << "\tdocs: https://github.com/haolamnm/dictionary/blob/main/README.md\n";
 }
 
-void App::show_stats() const {}
+void App::show_stats() const {
+    std::cout << std::left;
+    std::cout << std::setw(20) << "\tword-count" << ": " << dict->get_word_count() << '\n';
+    std::cout << std::setw(20) << "\tmemory-usage" << ": " << dict->get_memory_usage()
+              << " bytes\n";
+    std::cout << std::setw(20) << "\ttrie-height" << ": " << dict->get_trie_height() << '\n';
+    std::cout << std::setw(20) << "\tbktree-height" << ": " << dict->get_bktree_height() << '\n';
+}
 
 void App::clear() const {
     std::cout << "\033[2J\033[1;1H";
