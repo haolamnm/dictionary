@@ -22,8 +22,13 @@ class App {
 
    private:
     bool terminate(const std::string &input) const;
-    void help() const;
-    void welcome(const std::string &text, int delay_ms = 100) const;
+    void typewritter(const std::string &text, int delay_ms = 150) const;
+    void welcome();
+    bool parse_command(const std::string &command);
+    void show_docs() const;
+    void show_stats() const;
+    void clear() const;
+    void config();
     ;
 };
 
