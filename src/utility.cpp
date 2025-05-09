@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <format>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -63,4 +64,13 @@ bool get_int(int &input, const std::string &prompt, int min_value, int max_value
             return true;  // Valid input
         }
     }
+}
+
+void print_progress_bar(int progress, int total, int bar_width) {
+    float percent = 100.0f * progress / total;
+    int filled = static_cast<int>(percent * bar_width / 100.0f);
+    std::string bar(filled, '#');
+    bar += std::string(bar_width - filled, '-');
+    std::cout << "\r[" << bar << "] " << std::fixed << std::setprecision(1) << percent << "%"
+              << std::flush;
 }
