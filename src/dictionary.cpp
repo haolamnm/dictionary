@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -27,12 +28,25 @@ void Dictionary::insert(std::shared_ptr<Word> word) {
 }
 
 bool Dictionary::load(const std::string &filepath) {
-    std::ifstream fin(filepath.c_str());
+    std::ifstream fin(filepath.c_str(), std::ios::binary);
     if (fin.is_open() == false) {
         return false;
     }
+    // Get total file size
+    fin.seekg(0, std::ios::end);
+    std::streampos total_size = fin.tellg();
+    fin.seekg(0);
+
+    // Only show progress for file bigger than 4 megabytes
+    bool show_progress = (total_size > 4 * 1024 * 1024);
+
     std::string line;
     std::getline(fin, line);  // Skip header
+
+    std::shared_ptr<Word> current_word = nullptr;
+    std::string prev_text;
+
+    int line_processed = 0;
 
     while (std::getline(fin, line)) {
         std::string text, pos_string, definition;
@@ -49,10 +63,36 @@ bool Dictionary::load(const std::string &filepath) {
             std::getline(ss, definition);  // Fallback
         }
 
-        std::shared_ptr<Word> word = std::make_shared<Word>(text, definition, pos);
-        insert(word);
+        // If current text differ from previous text
+        if (current_word == nullptr || text != prev_text) {
+            // Insert previous word
+            if (current_word) {
+                insert(current_word);
+                word_count += 1;
+            }
+            // Start new word
+            current_word = std::make_shared<Word>(text);
+            prev_text = text;
+        }
+        current_word->add_pos(pos);
+        current_word->add_definition(definition);
+
+        if (show_progress && ++line_processed % 500 == 0) {
+            std::streampos current_pos = fin.tellg();
+            print_progress_bar(static_cast<int>(current_pos), static_cast<int>(total_size));
+        }
+    }
+    // Last word
+    if (current_word) {
+        insert(current_word);
         word_count += 1;
     }
+    // Final 100% bar
+    if (show_progress) {
+        print_progress_bar(1, 1);
+        std::cout << std::endl;
+    }
+
     // Set as stable after load a file
     trie->set_stable(true);
     bktree->set_stable(true);
@@ -85,10 +125,10 @@ std::vector<std::shared_ptr<Word>> Dictionary::search(const std::string &query) 
         case Mode::Match:
             return trie->match(query, config->max_matches);
         case Mode::None:
-            log(Status::Warning, "invalid query");
+            // NOTE: Disable log for performance
+            // log(Status::Warning, "invalid query");
             return {};
         default:
-            log(Status::Critical, "unexpected fallback");
             return {};
     }
 }
