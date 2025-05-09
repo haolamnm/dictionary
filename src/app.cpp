@@ -51,8 +51,10 @@ void App::run() {
         if (is_command) {
             continue;
         }
+        auto start = std::chrono::steady_clock::now();
         auto results = dict->search(lower(input));
-        print(results);
+        auto end = std::chrono::steady_clock::now();
+        print(results, end - start);
     }
 }
 
@@ -101,11 +103,30 @@ void App::show_docs() const {
 
 void App::show_stats() const {
     std::cout << std::left;
-    std::cout << std::setw(20) << "\tword-count" << ": " << dict->get_word_count() << '\n';
-    std::cout << std::setw(20) << "\tmemory-usage" << ": " << dict->get_memory_usage()
-              << " bytes\n";
-    std::cout << std::setw(20) << "\ttrie-height" << ": " << dict->get_trie_height() << '\n';
-    std::cout << std::setw(20) << "\tbktree-height" << ": " << dict->get_bktree_height() << '\n';
+    int word_count = dict->get_word_count();
+    std::string word_unit = (word_count == 1) ? "word" : "words";
+    std::cout << std::setw(20) << "\tword-count" << ": " << word_count << " " << word_unit << '\n';
+
+    size_t memory_usage = dict->get_memory_usage();
+    std::string memory_unit = "bytes";
+    double memory_display = static_cast<double>(memory_usage);
+    if (memory_usage >= 1024 && memory_usage < 1024 * 1024) {
+        memory_display /= 1024.0;
+        memory_unit = "kilobytes";
+    } else if (memory_usage >= 1024 * 1024 && memory_usage < 1024 * 1024 * 1024) {
+        memory_display /= (1024.0 * 1024.0);
+        memory_unit = "megabytes";
+    } else if (memory_usage >= 1024 * 1024 * 1024) {
+        memory_display /= (1024.0 * 1024.0 * 1024.0);
+        memory_unit = "gigabytes";
+    }
+    std::cout << std::setw(20) << "\tmemory-usage" << ": " << std::fixed << std::setprecision(2)
+              << memory_display << " " << memory_unit << '\n';
+
+    // NOTE: May not be useful for users
+    // std::cout << std::setw(20) << "\ttrie-height" << ": " << dict->get_trie_height() << '\n';
+    // std::cout << std::setw(20) << "\tbktree-height" << ": " << dict->get_bktree_height() << '\n';
+    std::cout << std::flush;
 }
 
 void App::clear() const {
