@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
         log(Status::Info, "dictionary.exe [filepath]");
         return -1;
     }
-    std::string default_filepath = "../data/words.csv";
+    std::string default_filepath = "../data/dictionary.csv";
     std::string filepath = argv[1] ? argv[1] : default_filepath;
 
     App app(filepath);
