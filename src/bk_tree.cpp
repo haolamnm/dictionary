@@ -31,11 +31,18 @@ void Tree::insert(std::shared_ptr<Word> word) {
 
 std::vector<std::shared_ptr<Word>> Tree::search(const std::string &query, int max_distance,
                                                 int max_searches) const {
-    std::vector<std::shared_ptr<Word>> results;
+    std::vector<std::pair<std::shared_ptr<Word>, int>> container;
     if (root.get() == nullptr) {
-        return results;
+        return {};
     }
-    search_core(root.get(), query, max_distance, results, max_searches);
+    search_core(root.get(), query, max_distance, container, max_searches);
+    std::sort(container.begin(), container.end(), [](const auto &a, const auto &b) {
+        return a.second < b.second;  // sort by distance
+    });
+    std::vector<std::shared_ptr<Word>> results;
+    for (const auto &pair : container) {
+        results.push_back(pair.first);
+    }
     return results;
 }
 
@@ -60,13 +67,14 @@ int Tree::get_height() {
 }
 
 void Tree::search_core(const Node *node, const std::string &query, int max_distance,
-                       std::vector<std::shared_ptr<Word>> &results, int max_searches) const {
+                       std::vector<std::pair<std::shared_ptr<Word>, int>> &results,
+                       int max_searches) const {
     if (node == nullptr || results.size() >= max_searches) return;
 
     int distance = calculate_distance(query, node->get_word()->get_text());
 
     if (distance <= max_distance) {
-        results.push_back(node->get_word());
+        results.emplace_back(node->get_word(), distance);
         if (results.size() >= max_searches) return;
     }
 

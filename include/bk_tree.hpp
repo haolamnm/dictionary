@@ -31,7 +31,8 @@ class Tree {
 
    private:
     void search_core(const Node *node, const std::string &query, int max_distance,
-                     std::vector<std::shared_ptr<Word>> &results, int max_searches) const;
+                     std::vector<std::pair<std::shared_ptr<Word>, int>> &results,
+                     int max_searches) const;
 
     int calculate_distance(const std::string &s1, const std::string &s2) const;
     size_t calculate_memory_usage(const Node *node) const;
