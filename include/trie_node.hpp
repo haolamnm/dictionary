@@ -7,6 +7,7 @@
 #include "word.hpp"
 
 namespace Trie {
+
 class Node {
    private:
     std::unordered_map<char, std::unique_ptr<Node>> children;
@@ -27,6 +28,7 @@ class Node {
 
    private:
 };
+
 };  // namespace Trie
 
 #endif
