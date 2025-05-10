@@ -11,11 +11,11 @@
 #include "utility.hpp"
 #include "word.hpp"
 
-App::App() : loaded(false), running(false) {
+App::App(bool silent) : loaded(false), running(false), silent(silent) {
     dict = std::make_unique<Dictionary>();
 }
 
-App::App(const std::string &filepath) : App() {
+App::App(const std::string &filepath, bool silent) : App(silent) {
     load(filepath);
 }
 
@@ -41,7 +41,9 @@ void App::run() {
     }
     std::string input;
     while (true) {
-        welcome();  // Run welcome effects
+        if (silent == false) {
+            welcome();  // Run welcome effects
+        }
 
         std::cout << "> ";
         if (!std::getline(std::cin, input) || terminate(input)) {

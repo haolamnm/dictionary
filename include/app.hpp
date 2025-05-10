@@ -11,10 +11,11 @@ class App {
     std::unique_ptr<Dictionary> dict;
     bool loaded = false;
     bool running = false;
+    bool silent = false;
 
    public:
-    App();
-    App(const std::string &filepath);
+    App(bool silent = false);
+    App(const std::string &filepath, bool silent = false);
     ~App() = default;
 
     bool load(const std::string &filepath);
