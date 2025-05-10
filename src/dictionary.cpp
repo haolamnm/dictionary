@@ -193,6 +193,7 @@ Query Dictionary::validate(const std::string &query) const {
         return q;  // Empty query
     }
     bool seen_wildcards = false;
+    char prev_c = '\0';
 
     for (size_t i = 0; i < query.size(); ++i) {
         char c = query[i];
@@ -202,9 +203,9 @@ Query Dictionary::validate(const std::string &query) const {
             return q;  // Unsupported characters
         }
         if (c == '*' || c == '+' || c == '?') {
-            if (seen_wildcards) {
+            if (seen_wildcards && !(c == '?' && prev_c == '?')) {
                 q.valid = false;
-                return q;  // Consecutive wildcards
+                return q;  // Consecutive wildcards except consecutive '?'
             }
             q.has_wildcards = true;
             seen_wildcards = true;
@@ -218,6 +219,7 @@ Query Dictionary::validate(const std::string &query) const {
             }
             q.has_underscore = true;
         }
+        prev_c = c;
     }
     return q;
 }
